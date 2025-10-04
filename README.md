@@ -38,7 +38,7 @@ An automated backend platform for UrbanStyle Apparel's inventory replenishment w
 - **Logging**: Winston for comprehensive logging
 - **Security**: Helmet, CORS, Rate limiting
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 project-sentry/
@@ -359,4 +359,4 @@ The system is fully operational and ready for:
 
 ---
 
-**Project Sentry** - Automating inventory replenishment for UrbanStyle Apparel 🎯
+**Project Sentry** - Automating inventory replenishment for UrbanStyle Apparel 
