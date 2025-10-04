@@ -1,0 +1,404 @@
+{
+  "info": {
+    "name": "Project Sentry - Inventory Replenishment API",
+    "description": "Complete API collection for Project Sentry automated inventory replenishment system with 4-stage workflow testing",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "replenishment_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check server health and database connection status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inventory Management",
+      "item": [
+        {
+          "name": "Get All Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "inventory"]
+            },
+            "description": "Retrieve all inventory items across all stores"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Store Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inventory/stores/STORE-NYC-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "inventory", "stores", "STORE-NYC-001"]
+            },
+            "description": "Get inventory for a specific store"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Low Stock Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inventory?low_stock=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "inventory"],
+              "query": [
+                {
+                  "key": "low_stock",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get items with stock below reorder threshold"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter by Store",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inventory?store_id=STORE-LA-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "inventory"],
+              "query": [
+                {
+                  "key": "store_id",
+                  "value": "STORE-LA-001"
+                }
+              ]
+            },
+            "description": "Filter inventory by specific store"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4-Stage Replenishment Workflow",
+      "item": [
+        {
+          "name": "Stage 1: Create Low Stock Alert",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extract replenishment_id from response",
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.replenishment_id) {",
+                  "        pm.collectionVariables.set('replenishment_id', responseJson.data.replenishment_id);",
+                  "        console.log('Replenishment ID saved:', responseJson.data.replenishment_id);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Test assertions",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has replenishment_id', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('replenishment_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"store_id\": \"STORE-NYC-001\",\n  \"product_id\": \"PROD-JEANS-001\",\n  \"product_name\": \"Slim Fit Jeans\",\n  \"current_stock\": 5,\n  \"reorder_threshold\": 10,\n  \"requested_quantity\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/replenishment/alerts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "replenishment", "alerts"]
+            },
+            "description": "Create a low stock alert (Stage 1 of replenishment workflow)"
+          },
+          "response": []
+        },
+        {
+          "name": "Stage 2: Create Transfer Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has transfer_order_id', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transfer_order_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"replenishment_id\": \"{{replenishment_id}}\",\n  \"warehouse_id\": \"WH-CENTRAL-001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/replenishment/transfer-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "replenishment", "transfer-orders"]
+            },
+            "description": "Create transfer order using replenishment_id from Stage 1"
+          },
+          "response": []
+        },
+        {
+          "name": "Stage 3: Create Shipment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has shipment_id', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('shipment_id');",
+                  "});",
+                  "",
+                  "pm.test('Response has tracking_number', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('tracking_number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"replenishment_id\": \"{{replenishment_id}}\",\n  \"carrier\": \"FedEx\",\n  \"estimated_delivery_days\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/replenishment/shipments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "replenishment", "shipments"]
+            },
+            "description": "Create shipment from warehouse using replenishment_id"
+          },
+          "response": []
+        },
+        {
+          "name": "Stage 4: Confirm Delivery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow completed', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data.status).to.equal('COMPLETED');",
+                  "});",
+                  "",
+                  "pm.test('Stock level updated', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('new_stock_level');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"replenishment_id\": \"{{replenishment_id}}\",\n  \"received_quantity\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/replenishment/deliveries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "replenishment", "deliveries"]
+            },
+            "description": "Complete the workflow by confirming delivery and updating stock"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sample Test Data",
+      "item": [
+        {
+          "name": "Test with Different Products",
+          "item": [
+            {
+              "name": "Alert: Cotton T-Shirt Low Stock",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"store_id\": \"STORE-LA-001\",\n  \"product_id\": \"PROD-SHIRT-001\",\n  \"product_name\": \"Cotton T-Shirt\",\n  \"current_stock\": 3,\n  \"reorder_threshold\": 15,\n  \"requested_quantity\": 30\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/replenishment/alerts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "replenishment", "alerts"]
+                }
+              }
+            },
+            {
+              "name": "Alert: Canvas Sneakers Low Stock",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"store_id\": \"STORE-CHI-001\",\n  \"product_id\": \"PROD-SNEAKERS-001\",\n  \"product_name\": \"Canvas Sneakers\",\n  \"current_stock\": 2,\n  \"reorder_threshold\": 8,\n  \"requested_quantity\": 20\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/replenishment/alerts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "replenishment", "alerts"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error Testing",
+          "item": [
+            {
+              "name": "Invalid Request - Missing Fields",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"store_id\": \"STORE-NYC-001\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/replenishment/alerts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "replenishment", "alerts"]
+                },
+                "description": "Test validation - should return 400 error"
+              }
+            },
+            {
+              "name": "Invalid Transfer Order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"replenishment_id\": \"INVALID-ID\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/replenishment/transfer-orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "replenishment", "transfer-orders"]
+                },
+                "description": "Test with invalid replenishment ID"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
