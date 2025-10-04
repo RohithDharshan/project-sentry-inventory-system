@@ -101,7 +101,7 @@ project-sentry/
    curl http://localhost:3000/health
    ```
 
-## 📊 API Documentation
+##  API Documentation
 
 ### Base URL
 ```
