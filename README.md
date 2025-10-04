@@ -2,28 +2,28 @@
 
 An automated backend platform for UrbanStyle Apparel's inventory replenishment workflow, featuring a 4-stage lifecycle management system with REST APIs, MongoDB persistence, and Kafka event streaming.
 
-## 🏗️ System Architecture
+## System Architecture
 
 ### 4-Stage Replenishment Workflow
 
-1. **Stage 1: Low-Stock Alert** 🚨
+1. **Stage 1: Low-Stock Alert** 
    - POS system detects stock below reorder threshold
    - Generates unique `replenishment_id`
    - Triggers `sentry.low-stock-alert` Kafka event
 
-2. **Stage 2: Transfer Order Creation** 📦
+2. **Stage 2: Transfer Order Creation** 
    - Creates stock transfer order from central warehouse
    - Validates warehouse inventory availability
    - Updates status to `PENDING_PICKING`
    - Triggers `sentry.transfer-order-created` event
 
-3. **Stage 3: Shipment from Warehouse** 🚚
+3. **Stage 3: Shipment from Warehouse** 
    - Warehouse operator picks and packs items
    - Generates tracking number and shipment ID
    - Updates status to `IN_TRANSIT`
    - Triggers `sentry.shipment-dispatched` event
 
-4. **Stage 4: Stock Received at Store** ✅
+4. **Stage 4: Stock Received at Store** 
    - Store employee confirms receipt
    - Updates inventory levels automatically
    - Status changes to `COMPLETED`
@@ -65,7 +65,7 @@ project-sentry/
 └── README.md                 # This file
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -225,7 +225,7 @@ Content-Type: application/json
 }
 ```
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### ReplenishmentOrder Document
 ```javascript
@@ -259,7 +259,7 @@ Content-Type: application/json
 }
 ```
 
-## 🔄 Kafka Event Flow
+##  Kafka Event Flow
 
 ### Event Topics
 - `sentry.low-stock-alert`
@@ -279,7 +279,7 @@ Content-Type: application/json
 }
 ```
 
-## 🛠️ Development
+##  Development
 
 ### Available Scripts
 ```bash
@@ -324,7 +324,7 @@ curl -X POST http://localhost:3000/api/v1/replenishment/deliveries \
   -d '{"replenishment_id":"REP-1696248000000-ABC12345","received_quantity":25}'
 ```
 
-## 🏪 Key Features
+##  Key Features
 
 ✅ **Digital Thread Maintenance**: Single source of truth for each replenishment order  
 ✅ **Unique ID Generation**: System-generated identifiers for all major artifacts  
@@ -336,7 +336,7 @@ curl -X POST http://localhost:3000/api/v1/replenishment/deliveries \
 ✅ **Database Indexing**: Optimized MongoDB queries with proper indexing  
 ✅ **API Documentation**: RESTful design with clear endpoint structure  
 
-## 📈 System Monitoring
+##  System Monitoring
 
 ### Health Endpoints
 - `GET /health` - Database connectivity and system status
@@ -348,7 +348,7 @@ curl -X POST http://localhost:3000/api/v1/replenishment/deliveries \
 - Kafka event publishing monitored
 - Error tracking with stack traces
 
-## 🚀 Deployment Ready
+##  Deployment Ready
 
 The system is fully operational and ready for:
 - Production deployment
